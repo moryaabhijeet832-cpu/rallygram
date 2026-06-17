@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const { Server } = require("socket.io");
 
-const authRoutes = require("./backend/routes/authRoutes");
+const authRoutes = require("./backend/models/backend/routes/authRoutes");
 dotenv.config();
 
 const app = express();
