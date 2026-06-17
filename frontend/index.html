@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rallygram</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f2f4f7;
+      color: #111;
+    }
+
+    .app {
+      max-width: 420px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: white;
+    }
+
+    .header {
+      background: #229ed9;
+      color: white;
+      padding: 18px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .box {
+      padding: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #229ed9;
+    }
+
+    .tabs button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: white;
+      color: #229ed9;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .tabs button.active {
+      background: #229ed9;
+      color: white;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .main-btn {
+      width: 100%;
+      padding: 13px;
+      background: #229ed9;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .message {
+      margin-top: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .success {
+      background: #e6ffed;
+      color: #0b7a29;
+      border: 1px solid #8ee6a3;
+    }
+
+    .error {
+      background: #ffecec;
+      color: #b00020;
+      border: 1px solid #ffb3b3;
+    }
+
+    .dashboard {
+      display: none;
+      padding: 20px;
+    }
+
+    .card {
+      background: #f5f7fa;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .logout {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #ff3b30;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .small {
+      color: #666;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="header">Rallygram</div>
+
+    <div class="box" id="authBox">
+      <div class="tabs">
+        <button id="loginTab" class="active" onclick="showLogin()">Login</button>
+        <button id="registerTab" onclick="showRegister()">Register</button>
+      </div>
+
+      <div id="loginForm">
+        <input type="text" id="loginPhone" placeholder="Phone number" />
+        <input type="password" id="loginPassword" placeholder="Password" />
+        <button class="main-btn" onclick="loginUser()">Login</button>
+      </div>
+
+      <div id="registerForm" style="display:none;">
+        <input type="text" id="regName" placeholder="Full name" />
+        <input type="text" id="regUsername" placeholder="Username" />
+        <input type="text" id="regPhone" placeholder="Phone number" />
+        <input type="password" id="regPassword" placeholder="Password" />
+        <button class="main-btn" onclick="registerUser()">Create Account</button>
+      </div>
+
+      <div id="msg" class="message"></div>
+    </div>
+
+    <div class="dashboard" id="dashboard">
+      <div class="card">
+        <h2>Welcome to Rallygram</h2>
+        <p id="userInfo">You are logged in.</p>
+        <p class="small">Authentication system connected with backend successfully.</p>
+      </div>
+
+      <button class="logout" onclick="logoutUser()">Logout</button>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = "https://rallygram-backend.onrender.com";
+
+    function showMessage(text, type) {
+      const msg = document.getElementById("msg");
+      msg.innerText = text;
+      msg.className = "message " + type;
+      msg.style.display = "block";
+    }
+
+    function showLogin() {
+      document.getElementById("loginForm").style.display = "block";
+      document.getElementById("registerForm").style.display = "none";
+      document.getElementById("loginTab").classList.add("active");
+      document.getElementById("registerTab").classList.remove("active");
+      document.getElementById("msg").style.display = "none";
+    }
+
+    function showRegister() {
+      document.getElementById("loginForm").style.display = "none";
+      document.getElementById("registerForm").style.display = "block";
+      document.getElementById("registerTab").classList.add("active");
+      document.getElementById("loginTab").classList.remove("active");
+      document.getElementById("msg").style.display = "none";
+    }
+
+    async function registerUser() {
+      const name = document.getElementById("regName").value.trim();
+      const username = document.getElementById("regUsername").value.trim();
+      const phone = document.getElementById("regPhone").value.trim();
+      const password = document.getElementById("regPassword").value.trim();
+
+      if (!name || !username || !phone || !password) {
+        showMessage("Please fill all fields", "error");
+        return;
+      }
+
+      try {
+        const res = await fetch(API_BASE + "/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name,
+            username,
+            phone,
+            password
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showMessage(data.message || "Registration failed", "error");
+          return;
+        }
+
+        showMessage("Account created successfully. Now login.", "success");
+        showLogin();
+
+      } catch (error) {
+        showMessage("Backend connection failed", "error");
+      }
+    }
+
+    async function loginUser() {
+      const phone = document.getElementById("loginPhone").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+
+      if (!phone || !password) {
+        showMessage("Please enter phone and password", "error");
+        return;
+      }
+
+      try {
+        const res = await fetch(API_BASE + "/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            phone,
+            password
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          showMessage(data.message || "Login failed", "error");
+          return;
+        }
+
+        localStorage.setItem("rallygram_token", data.token || "");
+        localStorage.setItem("rallygram_user", JSON.stringify(data.user || {}));
+
+        openDashboard(data.user);
+
+      } catch (error) {
+        showMessage("Backend connection failed", "error");
+      }
+    }
+
+    function openDashboard(user) {
+      document.getElementById("authBox").style.display = "none";
+      document.getElementById("dashboard").style.display = "block";
+
+      if (user && user.username) {
+        document.getElementById("userInfo").innerText = "Logged in as @" + user.username;
+      }
+    }
+
+    function logoutUser() {
+      localStorage.removeItem("rallygram_token");
+      localStorage.removeItem("rallygram_user");
+      document.getElementById("dashboard").style.display = "none";
+      document.getElementById("authBox").style.display = "block";
+      showLogin();
+    }
+
+    window.onload = function () {
+      const token = localStorage.getItem("rallygram_token");
+      const user = JSON.parse(localStorage.getItem("rallygram_user") || "{}");
+
+      if (token) {
+        openDashboard(user);
+      }
+    };
+  </script>
+</body>
+</html>
