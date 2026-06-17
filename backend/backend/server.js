@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const { Server } = require("socket.io");
 
+const authRoutes = require("./routes/authRoutes");
+
 dotenv.config();
 
 const app = express();
@@ -12,6 +14,9 @@ const server = http.createServer(app);
 
 app.use(cors());
 app.use(express.json());
+
+// API Routes
+app.use("/api/auth", authRoutes);
 
 const io = new Server(server, {
   cors: {
