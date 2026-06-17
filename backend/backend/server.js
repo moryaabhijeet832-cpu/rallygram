@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 // API Routes
-app.use("/api/auth", require("./backend/routes/authRoutes"));
+app.use("/api/auth", authRoutes);
 
 const io = new Server(server, {
   cors: {
