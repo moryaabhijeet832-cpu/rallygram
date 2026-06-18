@@ -363,10 +363,14 @@
     var API_URL = "https://rallygram-backend-2.onrender.com";
     var app = document.getElementById("app");
     var isLogin = true;
-var socket = io(API_URL, {
-  transports: ["websocket", "polling"]
-});
-
+var socket = window.io
+  ? io(API_URL, {
+      transports: ["websocket", "polling"]
+    })
+  : {
+      on: function() {},
+      emit: function() {}
+    };
 var currentChatName = "";
     var currentChatTitle = "";
 
