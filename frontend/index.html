@@ -468,6 +468,7 @@ socket.on("receive_message", function(data) {
 
   messagesBox.scrollTop = messagesBox.scrollHeight;
 });
+    function renderAuth(message) {
       if (!message) message = "";
 
       if (isLogin) {
