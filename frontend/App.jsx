@@ -140,7 +140,7 @@ function App() {
     <div style={styles.page}>
       <header style={styles.topBar}>
         <div>
-          <h1 style={styles.logo}>Rallygram</h1>
+          <h1 style={styles.logo}>Rallygram V2</h1>
           <p style={styles.logged}>@{currentUser}</p>
         </div>
 
