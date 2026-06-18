@@ -122,5 +122,23 @@ router.post("/login", async (req, res) => {
     });
   }
 });
+// Get all users
+router.get("/users", async (req, res) => {
+  try {
+    const users = await User.find()
+      .select("name username phone createdAt")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Users load failed",
+    });
+  }
+});
 
 module.exports = router;
