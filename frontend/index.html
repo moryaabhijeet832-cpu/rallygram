@@ -865,6 +865,57 @@ async function loadRecentChats() {
   }
 }
 
+    function renderProfile() {
+  window.scrollTo(0, 0);
+
+  var username = localStorage.getItem("username") || "user";
+  var name = localStorage.getItem("name") || "Rallygram User";
+  var phone = localStorage.getItem("phone") || "Not available";
+  var firstLetter = username.charAt(0).toUpperCase();
+
+  app.innerHTML =
+    '<div class="page">' +
+      '<header class="top-bar">' +
+        '<div>' +
+          '<h1 class="logo">Profile</h1>' +
+          '<p class="logged">Your Rallygram account</p>' +
+        '</div>' +
+        '<button class="logout-small" onclick="renderDashboard()">Back</button>' +
+      '</header>' +
+
+      '<main class="container">' +
+        '<section class="profile-card">' +
+          '<div class="profile-avatar-big">' + safeText(firstLetter) + '</div>' +
+          '<h2 class="profile-name">' + safeText(name) + '</h2>' +
+          '<p class="profile-username">@' + safeText(username) + '</p>' +
+
+          '<div class="profile-row">' +
+            '<div class="profile-label">Username</div>' +
+            '<div class="profile-value">@' + safeText(username) + '</div>' +
+          '</div>' +
+
+          '<div class="profile-row">' +
+            '<div class="profile-label">Phone</div>' +
+            '<div class="profile-value">' + safeText(phone) + '</div>' +
+          '</div>' +
+
+          '<div class="profile-row">' +
+            '<div class="profile-label">Account Status</div>' +
+            '<div class="profile-value">Active</div>' +
+          '</div>' +
+
+          '<button class="profile-btn" onclick="renderDashboard()">Back to Dashboard</button>' +
+          '<button class="profile-btn profile-danger" onclick="logout()">Logout</button>' +
+        '</section>' +
+      '</main>' +
+
+      '<nav class="bottom-nav">' +
+        '<div onclick="renderDashboard()">💬<br />Chats</div>' +
+        '<div onclick="renderDashboard()">👥<br />Users</div>' +
+        '<div onclick="renderProfile()">👤<br />Profile</div>' +
+      '</nav>' +
+    '</div>';
+    }
 function renderDashboard() {
   window.scrollTo(0, 0);
 
