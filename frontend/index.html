@@ -549,9 +549,9 @@ messagesBox.innerHTML =
    function openChat(chatName, avatar, titleText) {
   window.scrollTo(0, 0);
   currentChatName = chatName;
-     currentChatTitle = displayTitle;
 
   var displayTitle = titleText || chatName;
+  currentChatTitle = displayTitle;
 
   app.innerHTML =
     '<div class="chat-page">' +
@@ -684,6 +684,58 @@ async function loadUsers() {
     usersList.innerHTML = '<div class="chat-item">Backend connect failed</div>';
   }
 }
+async function loadRecentChats() {
+  var recentList = document.getElementById("recentChatsList");
+
+  if (!recentList) {
+    return;
+  }
+
+  var myUsername = localStorage.getItem("username") || "user";
+
+  recentList.innerHTML = '<div class="chat-item">Loading recent chats...</div>';
+
+  try {
+    var response = await fetch(API_URL + "/api/messages/recent/" + myUsername);
+    var data = await response.json();
+
+    if (!data.success || !data.chats || data.chats.length === 0) {
+      recentList.innerHTML = '<div class="chat-item">No recent chats yet</div>';
+      return;
+    }
+
+    recentList.innerHTML = "";
+
+    data.chats.forEach(function(chat) {
+      var roomName = chat._id;
+      var parts = roomName.split(":");
+
+      var otherUsername = "user";
+
+      if (parts.length === 3) {
+        otherUsername = parts[1] === myUsername ? parts[2] : parts[1];
+      }
+
+      var firstLetter = otherUsername.charAt(0).toUpperCase();
+      var lastMessage = chat.lastMessage || "No message";
+
+      recentList.innerHTML +=
+        '<div class="chat-item" onclick="openChat(\'' + roomName + '\', \'' + firstLetter + '\', \'@' + otherUsername + '\')">' +
+          '<div class="avatar">' + firstLetter + '</div>' +
+          '<div class="chat-info">' +
+            '<div class="chat-top">' +
+              '<h3>@' + safeText(otherUsername) + '</h3>' +
+              '<span>Recent</span>' +
+            '</div>' +
+            '<p>' + safeText(lastMessage) + '</p>' +
+          '</div>' +
+        '</div>';
+    });
+  } catch (error) {
+    recentList.innerHTML = '<div class="chat-item">Recent chats load failed</div>';
+  }
+}
+
 function renderDashboard() {
   window.scrollTo(0, 0);
 
@@ -701,6 +753,7 @@ function renderDashboard() {
 
       '<main class="container">' +
         '<input id="userSearchInput" class="search-box" placeholder="Search users by name, username, phone..." oninput="filterUsers()" />' +
+
         '<section class="quick-grid">' +
           '<div class="quick-box"><span class="quick-icon">💬</span>Chats</div>' +
           '<div class="quick-box"><span class="quick-icon">👥</span>Users</div>' +
@@ -730,25 +783,11 @@ function renderDashboard() {
       '</nav>' +
     '</div>';
 
-  if (typeof loadRecentChats === "function") {
   loadRecentChats();
-} else {
-  var recentBox = document.getElementById("recentChatsList");
-  if (recentBox) {
-    recentBox.innerHTML = '<div class="chat-item">Recent chats function missing</div>';
-  }
+  loadUsers();
 }
 
-if (typeof loadUsers === "function") {
-  loadUsers();
-} else {
-  var usersBox = document.getElementById("usersList");
-  if (usersBox) {
-    usersBox.innerHTML = '<div class="chat-item">Users function missing</div>';
-  }
-}
-    
-    try {
+try {
   if (localStorage.getItem("token")) {
     renderDashboard();
   } else {
