@@ -51,7 +51,60 @@ const messageSchema = new mongoose.Schema(
 );
 
 const Message = mongoose.model("Message", messageSchema);
+// Get recent chats for a user
+app.get("/api/messages/recent/:username", async (req, res) => {
+  try {
+    const username = req.params.username;
 
+    const recentChats = await Message.aggregate([
+      {
+        $match: {
+          chat: {
+            $regex: username,
+            $options: "i",
+          },
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+      {
+        $group: {
+          _id: "$chat",
+          lastMessage: {
+            $first: "$text",
+          },
+          sender: {
+            $first: "$sender",
+          },
+          time: {
+            $first: "$time",
+          },
+          createdAt: {
+            $first: "$createdAt",
+          },
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      success: true,
+      chats: recentChats,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Recent chats load failed",
+    });
+  }
+});
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
