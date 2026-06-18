@@ -947,6 +947,88 @@ localStorage.setItem("bio", bio);
       '</nav>' +
     '</div>';
 }
+    function renderEditProfile(message) {
+  window.scrollTo(0, 0);
+
+  if (!message) message = "";
+
+  var username = localStorage.getItem("username") || "user";
+  var name = localStorage.getItem("name") || "";
+  var phone = localStorage.getItem("phone") || "";
+  var bio = localStorage.getItem("bio") || "";
+
+  app.innerHTML =
+    '<div class="page">' +
+      '<header class="top-bar">' +
+        '<div>' +
+          '<h1 class="logo">Edit Profile</h1>' +
+          '<p class="logged">@' + safeText(username) + '</p>' +
+        '</div>' +
+        '<button class="logout-small" onclick="renderProfile()">Back</button>' +
+      '</header>' +
+
+      '<main class="container">' +
+        '<section class="profile-card">' +
+          '<input id="editName" placeholder="Full name" value="' + safeText(name) + '" />' +
+          '<input id="editPhone" placeholder="Phone number" value="' + safeText(phone) + '" />' +
+          '<input id="editBio" placeholder="Bio" value="' + safeText(bio) + '" />' +
+
+          (message ? '<p class="message">' + safeText(message) + '</p>' : '') +
+
+          '<button class="profile-btn" onclick="saveProfile()">Save Profile</button>' +
+          '<button class="profile-btn profile-danger" onclick="renderProfile()">Cancel</button>' +
+        '</section>' +
+      '</main>' +
+
+      '<nav class="bottom-nav">' +
+        '<div onclick="renderDashboard()">💬<br />Chats</div>' +
+        '<div onclick="renderDashboard()">👥<br />Users</div>' +
+        '<div onclick="renderProfile()">👤<br />Profile</div>' +
+      '</nav>' +
+    '</div>';
+}
+
+async function saveProfile() {
+  var username = localStorage.getItem("username") || "user";
+
+  var name = document.getElementById("editName").value.trim();
+  var phone = document.getElementById("editPhone").value.trim();
+  var bio = document.getElementById("editBio").value.trim();
+
+  if (!name || !phone) {
+    renderEditProfile("Name और phone जरूरी है");
+    return;
+  }
+
+  try {
+    var response = await fetch(API_URL + "/api/auth/profile/" + username, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: name,
+        phone: phone,
+        bio: bio
+      })
+    });
+
+    var data = await response.json();
+
+    if (!data.success) {
+      renderEditProfile(data.message || "Profile update failed");
+      return;
+    }
+
+    localStorage.setItem("name", name);
+    localStorage.setItem("phone", phone);
+    localStorage.setItem("bio", bio);
+
+    renderProfile();
+  } catch (error) {
+    renderEditProfile("Backend connect failed");
+  }
+}
 function renderDashboard() {
   window.scrollTo(0, 0);
 
