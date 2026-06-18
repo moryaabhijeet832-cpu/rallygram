@@ -435,8 +435,10 @@ socket.on("receive_message", function(data) {
   var messageClass = data.sender === myUsername ? "my-message" : "other-message";
 
   messages.innerHTML +=
-    '<div class="' + messageClass + '">' + safeText(data.text) + '</div>';
-
+  '<div class="' + messageClass + '">' +
+    safeText(data.text) +
+    '<div class="message-time">' + safeText(formatMessageTime(data.time || data.createdAt)) + '</div>' +
+  '</div>';
   messages.scrollTop = messages.scrollHeight;
 });
     socket.on("old_messages", function(messages) {
@@ -457,9 +459,10 @@ messagesBox.innerHTML =
     var messageClass = msg.sender === myUsername ? "my-message" : "other-message";
 
     messagesBox.innerHTML +=
-      '<div class="' + messageClass + '">' + safeText(msg.text) + '</div>';
-  });
-
+  '<div class="' + messageClass + '">' +
+    safeText(msg.text) +
+    '<div class="message-time">' + safeText(formatMessageTime(msg.time || msg.createdAt)) + '</div>' +
+  '</div>';
   messagesBox.scrollTop = messagesBox.scrollHeight;
 });
     function renderAuth(message) {
