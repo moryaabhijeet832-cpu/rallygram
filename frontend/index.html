@@ -864,33 +864,12 @@ async function loadRecentChats() {
     recentList.innerHTML = '<div class="chat-item">Recent chats load failed</div>';
   }
 }
-
-    async function renderProfile() {
+function renderProfile() {
   window.scrollTo(0, 0);
 
   var username = localStorage.getItem("username") || "user";
   var name = localStorage.getItem("name") || "Rallygram User";
   var phone = localStorage.getItem("phone") || "Not available";
-
-  try {
-    var response = await fetch(API_URL + "/api/auth/users");
-    var data = await response.json();
-
-    if (data.success && data.users) {
-      var currentUser = data.users.find(function(user) {
-        return user.username === username;
-      });
-
-      if (currentUser) {
-        name = currentUser.name || name;
-        phone = currentUser.phone || phone;
-
-        localStorage.setItem("name", name);
-        localStorage.setItem("phone", phone);
-      }
-    }
-  } catch (error) {}
-
   var firstLetter = username.charAt(0).toUpperCase();
 
   app.innerHTML =
