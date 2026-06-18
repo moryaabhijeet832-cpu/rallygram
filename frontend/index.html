@@ -938,7 +938,7 @@ function renderDashboard() {
           '<div class="quick-box"><span class="quick-icon">💬</span>Chats</div>' +
           '<div class="quick-box"><span class="quick-icon">👥</span>Users</div>' +
           '<div class="quick-box"><span class="quick-icon">📢</span>Channels</div>' +
-          '<div class="quick-box"><span class="quick-icon">👤</span>Profile</div>' +
+          '<div class="quick-box" onclick="renderProfile()"><span class="quick-icon">👤</span>Profile</div>' +
         '</section>' +
 
         '<h2 class="section-title">Recent Chats</h2>' +
@@ -959,7 +959,7 @@ function renderDashboard() {
       '<nav class="bottom-nav">' +
         '<div>💬<br />Chats</div>' +
         '<div>👥<br />Users</div>' +
-        '<div>👤<br />Profile</div>' +
+        '<div onclick="renderProfile()">👤<br />Profile</div>' +
       '</nav>' +
     '</div>';
 
