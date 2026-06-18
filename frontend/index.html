@@ -351,12 +351,44 @@
 
 <body>
   <div id="app"></div>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
   <script>
     var API_URL = "https://rallygram-backend.onrender.com";
     var app = document.getElementById("app");
     var isLogin = true;
+var socket = io(API_URL, {
+  transports: ["websocket", "polling"]
+});
 
+var currentChatName = "";
+
+function safeText(text) {
+  return String(text)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+socket.on("receive_message", function(data) {
+  var messages = document.getElementById("chatMessages");
+
+  if (!messages || !currentChatName) {
+    return;
+  }
+
+  if (data.chat !== currentChatName) {
+    return;
+  }
+
+  var myUsername = localStorage.getItem("username") || "user";
+  var messageClass = data.sender === myUsername ? "my-message" : "other-message";
+
+  messages.innerHTML +=
+    '<div class="' + messageClass + '">' + safeText(data.text) + '</div>';
+
+  messages.scrollTop = messages.scrollHeight;
+});
     function renderAuth(message) {
       if (!message) message = "";
 
@@ -485,6 +517,9 @@
     }
 
    function openChat(chatName, avatar) {
+  window.scrollTo(0, 0);
+  currentChatName = chatName;
+
   app.innerHTML =
     '<div class="chat-page">' +
       '<header class="chat-header">' +
@@ -495,7 +530,6 @@
 
       '<div id="chatMessages" class="messages-area">' +
         '<div class="other-message">Welcome to ' + chatName + '</div>' +
-        '<div class="my-message">Hello 👋</div>' +
       '</div>' +
 
       '<div class="message-box">' +
@@ -507,13 +541,20 @@
 
 function sendDemoMessage() {
   var input = document.getElementById("messageInput");
-  var messages = document.getElementById("chatMessages");
 
-  if (!input.value.trim()) {
+  if (!input || !input.value.trim()) {
     return;
   }
 
-  messages.innerHTML += '<div class="my-message">' + input.value + '</div>';
+  var myUsername = localStorage.getItem("username") || "user";
+
+  socket.emit("send_message", {
+    chat: currentChatName,
+    text: input.value.trim(),
+    sender: myUsername,
+    time: new Date().toLocaleTimeString()
+  });
+
   input.value = "";
 }
 function renderDashboard() {
