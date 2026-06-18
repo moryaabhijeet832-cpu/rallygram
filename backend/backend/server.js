@@ -27,6 +27,30 @@ const io = new Server(server, {
 app.get("/", (req, res) => {
   res.send("Rallygram Backend is running");
 });
+const messageSchema = new mongoose.Schema(
+  {
+    chat: {
+      type: String,
+      required: true,
+    },
+    text: {
+      type: String,
+      required: true,
+    },
+    sender: {
+      type: String,
+      required: true,
+    },
+    time: {
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const Message = mongoose.model("Message", messageSchema);
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -40,8 +64,31 @@ mongoose
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  socket.on("send_message", (data) => {
-    io.emit("receive_message", data);
+  socket.on("join_chat", async (chatName) => {
+    try {
+      const messages = await Message.find({ chat: chatName })
+        .sort({ createdAt: 1 })
+        .limit(100);
+
+      socket.emit("old_messages", messages);
+    } catch (error) {
+      console.log("Old messages load error:", error);
+    }
+  });
+
+  socket.on("send_message", async (data) => {
+    try {
+      const savedMessage = await Message.create({
+        chat: data.chat,
+        text: data.text,
+        sender: data.sender,
+        time: data.time,
+      });
+
+      io.emit("receive_message", savedMessage);
+    } catch (error) {
+      console.log("Message save error:", error);
+    }
   });
 
   socket.on("disconnect", () => {
