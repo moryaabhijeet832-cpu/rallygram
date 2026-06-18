@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema(
       required: true
     },
 
+    bio: {
+  type: String,
+  default: ""
+    }
+      
     profilePhoto: {
       type: String,
       default: ""
