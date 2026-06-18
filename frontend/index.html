@@ -771,7 +771,7 @@ async function loadRecentChats() {
           '<div class="chat-info">' +
             '<div class="chat-top">' +
               '<h3>@' + safeText(otherUsername) + '</h3>' +
-              '<span>Recent</span>' +
+              '<span>' + safeText(formatMessageTime(chat.time || chat.createdAt)) + '</span>' +
             '</div>' +
             '<p>' + safeText(lastMessage) + '</p>' +
           '</div>' +
