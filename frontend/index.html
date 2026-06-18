@@ -394,7 +394,32 @@ function safeText(text) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
 }
+function formatMessageTime(value) {
+  if (!value) {
+    return "";
+  }
 
+  var text = String(value);
+
+  if (text.includes(":") && !text.includes("T")) {
+    return text.split(":").slice(0, 2).join(":");
+  }
+
+  try {
+    var date = new Date(value);
+
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    return text;
+  } catch (error) {
+    return text;
+  }
+}
 socket.on("receive_message", function(data) {
   var messages = document.getElementById("chatMessages");
 
