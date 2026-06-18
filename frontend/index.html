@@ -670,6 +670,8 @@ if (data.user && data.user.name) {
     function logout() {
       localStorage.removeItem("token");
       localStorage.removeItem("username");
+      localStorage.removeItem("name");
+localStorage.removeItem("phone");
       renderAuth("");
     }
 
