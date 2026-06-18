@@ -4,7 +4,100 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rallygram</title>
+.chat-page {
+  min-height: 100vh;
+  background: #f4f6fb;
+  display: flex;
+  flex-direction: column;
+}
 
+.chat-header {
+  background: #229ed9;
+  color: white;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.back-btn {
+  background: white;
+  color: #229ed9;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.chat-header .avatar {
+  width: 46px;
+  height: 46px;
+  font-size: 20px;
+}
+
+.chat-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.messages-area {
+  flex: 1;
+  padding: 18px;
+  padding-bottom: 90px;
+}
+
+.other-message {
+  background: white;
+  padding: 12px 14px;
+  border-radius: 16px 16px 16px 4px;
+  margin-bottom: 12px;
+  max-width: 75%;
+  color: #111;
+  font-size: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.my-message {
+  background: #229ed9;
+  color: white;
+  padding: 12px 14px;
+  border-radius: 16px 16px 4px 16px;
+  margin-bottom: 12px;
+  max-width: 75%;
+  margin-left: auto;
+  font-size: 16px;
+}
+
+.message-box {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  background: white;
+  border-top: 1px solid #ddd;
+}
+
+.message-input {
+  flex: 1;
+  margin: 0;
+  border-radius: 18px;
+}
+
+.send-btn {
+  background: #229ed9;
+  color: white;
+  border: none;
+  border-radius: 18px;
+  padding: 0 18px;
+  font-size: 16px;
+  font-weight: 800;
+}
+  
   <style>
     * {
       box-sizing: border-box;
