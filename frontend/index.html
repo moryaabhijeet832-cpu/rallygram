@@ -558,6 +558,7 @@ socket.on("receive_message", function(data) {
         '<button class="send-btn" onclick="sendDemoMessage()">Send</button>' +
       '</div>' +
     '</div>';
+     socket.emit("join_chat", chatName);
 }
 
 function sendDemoMessage() {
