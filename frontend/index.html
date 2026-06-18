@@ -537,20 +537,22 @@ socket.on("receive_message", function(data) {
       renderAuth("");
     }
 
-   function openChat(chatName, avatar) {
+   function openChat(chatName, avatar, titleText) {
   window.scrollTo(0, 0);
   currentChatName = chatName;
+
+  var displayTitle = titleText || chatName;
 
   app.innerHTML =
     '<div class="chat-page">' +
       '<header class="chat-header">' +
         '<button class="back-btn" onclick="renderDashboard()">←</button>' +
-        '<div class="avatar">' + avatar + '</div>' +
-        '<h1 class="chat-title">' + chatName + '</h1>' +
+        '<div class="avatar">' + safeText(avatar) + '</div>' +
+        '<h1 class="chat-title">' + safeText(displayTitle) + '</h1>' +
       '</header>' +
 
       '<div id="chatMessages" class="messages-area">' +
-        '<div class="other-message">Welcome to ' + chatName + '</div>' +
+        '<div class="other-message">Welcome to ' + safeText(displayTitle) + '</div>' +
       '</div>' +
 
       '<div class="message-box">' +
@@ -558,7 +560,8 @@ socket.on("receive_message", function(data) {
         '<button class="send-btn" onclick="sendDemoMessage()">Send</button>' +
       '</div>' +
     '</div>';
-     socket.emit("join_chat", chatName);
+
+  socket.emit("join_chat", chatName);
 }
 
 function sendDemoMessage() {
@@ -579,7 +582,66 @@ function sendDemoMessage() {
 
   input.value = "";
 }
+function makePrivateRoom(myUsername, otherUsername) {
+  var users = [String(myUsername), String(otherUsername)].sort();
+  return "private:" + users[0] + ":" + users[1];
+}
+
+async function loadUsers() {
+  var usersList = document.getElementById("usersList");
+
+  if (!usersList) {
+    return;
+  }
+
+  usersList.innerHTML = '<div class="chat-item">Loading users...</div>';
+
+  try {
+    var response = await fetch(API_URL + "/api/auth/users");
+    var data = await response.json();
+
+    if (!data.success) {
+      usersList.innerHTML = '<div class="chat-item">Users load failed</div>';
+      return;
+    }
+
+    var myUsername = localStorage.getItem("username") || "user";
+
+    var users = data.users.filter(function(user) {
+      return user.username !== myUsername;
+    });
+
+    if (users.length === 0) {
+      usersList.innerHTML = '<div class="chat-item">No other users found</div>';
+      return;
+    }
+
+    usersList.innerHTML = "";
+
+    users.forEach(function(user) {
+      var firstLetter = user.username ? user.username.charAt(0).toUpperCase() : "U";
+      var roomName = makePrivateRoom(myUsername, user.username);
+
+      usersList.innerHTML +=
+        '<div class="chat-item" onclick="openChat(\'' + roomName + '\', \'' + firstLetter + '\', \'@' + user.username + '\')">' +
+          '<div class="avatar">' + firstLetter + '</div>' +
+          '<div class="chat-info">' +
+            '<div class="chat-top">' +
+              '<h3>@' + safeText(user.username) + '</h3>' +
+              '<span>Online</span>' +
+            '</div>' +
+            '<p>' + safeText(user.name || "Rallygram user") + '</p>' +
+          '</div>' +
+        '</div>';
+    });
+  } catch (error) {
+    usersList.innerHTML = '<div class="chat-item">Backend connect failed</div>';
+  }
+                                  }
+    
 function renderDashboard() {
+  window.scrollTo(0, 0);
+
   var username = localStorage.getItem("username") || "user";
 
   app.innerHTML =
@@ -593,54 +655,32 @@ function renderDashboard() {
       '</header>' +
 
       '<main class="container">' +
-        '<div class="search-box">Search chats, groups, channels...</div>' +
+        '<div class="search-box">Search users, chats, groups...</div>' +
 
         '<section class="quick-grid">' +
           '<div class="quick-box"><span class="quick-icon">💬</span>Chats</div>' +
-          '<div class="quick-box"><span class="quick-icon">👥</span>Groups</div>' +
+          '<div class="quick-box"><span class="quick-icon">👥</span>Users</div>' +
           '<div class="quick-box"><span class="quick-icon">📢</span>Channels</div>' +
           '<div class="quick-box"><span class="quick-icon">👤</span>Profile</div>' +
         '</section>' +
 
-        '<h2 class="section-title">Messages</h2>' +
+        '<h2 class="section-title">Rallygram Users</h2>' +
 
-        '<section class="chat-list">' +
-
-          '<div class="chat-item" onclick="openChat(\'Rallygram Updates\', \'R\')">' +
-            '<div class="avatar">R</div>' +
-            '<div class="chat-info">' +
-              '<div class="chat-top"><h3>Rallygram Updates</h3><span>Now</span></div>' +
-              '<p>Welcome to your new social app!</p>' +
-            '</div>' +
-          '</div>' +
-
-          '<div class="chat-item" onclick="openChat(\'Friends Group\', \'F\')">' +
-            '<div class="avatar">F</div>' +
-            '<div class="chat-info">' +
-              '<div class="chat-top"><h3>Friends Group</h3><span>10:30</span></div>' +
-              '<p>Create groups like Telegram.</p>' +
-            '</div>' +
-          '</div>' +
-
-          '<div class="chat-item" onclick="openChat(\'My Channel\', \'C\')">' +
-            '<div class="avatar">C</div>' +
-            '<div class="chat-info">' +
-              '<div class="chat-top"><h3>My Channel</h3><span>09:15</span></div>' +
-              '<p>Post updates for followers.</p>' +
-            '</div>' +
-          '</div>' +
-
+        '<section id="usersList" class="chat-list">' +
+          '<div class="chat-item">Loading users...</div>' +
         '</section>' +
       '</main>' +
 
-      '<button class="floating-button" onclick="alert(\'New chat feature coming next\')">+</button>' +
+      '<button class="floating-button" onclick="alert(\'Add user feature coming next\')">+</button>' +
 
       '<nav class="bottom-nav">' +
         '<div>💬<br />Chats</div>' +
-        '<div>📢<br />Channels</div>' +
+        '<div>👥<br />Users</div>' +
         '<div>👤<br />Profile</div>' +
       '</nav>' +
     '</div>';
+
+  loadUsers();
 }
     
     if (localStorage.getItem("token")) {
