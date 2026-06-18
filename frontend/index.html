@@ -5,312 +5,373 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Rallygram</title>
 
-  <script>
-  const API_URL = "https://rallygram-backend.onrender.com";
-  const app = document.getElementById("app");
-
-  let isLogin = true;
-
-  function getToken() {
-    return localStorage.getItem("token") || "";
-  }
-
-  function getUsername() {
-    return localStorage.getItem("username") || "user";
-  }
-
-  function renderAuth(message = "") {
-    app.innerHTML = `
-      <div class="auth-page">
-        <div class="auth-card">
-          <h1 class="auth-logo">Rallygram V2</h1>
-          <p class="auth-text">Fast, secure and simple social messaging app</p>
-
-          <form onsubmit="handleAuth(event)">
-            ${
-              isLogin
-                ? `
-                  <input id="phone" placeholder="Phone number" />
-                  <input id="password" placeholder="Password" type="password" />
-                `
-                : `
-                  <input id="name" placeholder="Full name" />
-                  <input id="username" placeholder="Username" />
-                  <input id="phone" placeholder="Phone number" />
-                  <input id="password" placeholder="Password" type="password" />
-                `
-            }
-
-            ${message ? `<p class="message">${message}</p>` : ""}
-
-            <button class="auth-button" type="submit">
-              ${isLogin ? "Login" : "Create Account"}
-            </button>
-          </form>
-
-          <button class="switch-button" onclick="toggleMode()">
-            ${isLogin ? "New user? Create account" : "Already have account? Login"}
-          </button>
-        </div>
-      </div>
-    `;
-  }
-
-  async function handleAuth(event) {
-    event.preventDefault();
-
-    const password = document.getElementById("password").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-
-    let bodyData = {};
-
-    if (isLogin) {
-      if (!phone || !password) {
-        renderAuth("Phone और password दोनों भरो");
-        return;
-      }
-
-      bodyData = {
-        phone,
-        password
-      };
-    } else {
-      const name = document.getElementById("name").value.trim();
-      const username = document.getElementById("username").value.trim();
-
-      if (!name || !username || !phone || !password) {
-        renderAuth("Name, username, phone और password सभी भरो");
-        return;
-      }
-
-      bodyData = {
-        name,
-        username,
-        phone,
-        password
-      };
+  <style>
+    * {
+      box-sizing: border-box;
     }
 
-    try {
-      const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
-
-      const res = await fetch(API_URL + endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(bodyData)
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        renderAuth(data.message || data.error || "Something went wrong");
-        return;
-      }
-
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem(
-          "username",
-          data.user?.username || bodyData.username || bodyData.phone
-        );
-        renderDashboard();
-      } else {
-        isLogin = true;
-        renderAuth("Account created. अब phone number से login करो.");
-      }
-    } catch (error) {
-      renderAuth("Backend connect नहीं हो रहा. Backend URL check करो.");
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+      color: #111;
     }
-  }
 
-  function toggleMode() {
-    isLogin = !isLogin;
-    renderAuth();
-  }
+    .auth-page {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #229ed9, #ffffff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
 
-  function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
-    renderAuth();
-  }
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    }
 
-  function renderDashboard() {
-    const username = getUsername();
+    .auth-logo {
+      text-align: center;
+      color: #229ed9;
+      font-size: 38px;
+      margin: 0;
+      font-weight: 800;
+    }
 
-    app.innerHTML = `
-      <div class="page">
-        <header class="top-bar">
-          <div>
-            <h1 class="logo">Rallygram V2</h1>
-            <p class="logged">@${username}</p>
-          </div>
+    .auth-text {
+      text-align: center;
+      color: #666;
+      margin-bottom: 24px;
+      font-size: 17px;
+      line-height: 1.4;
+    }
 
-          <button class="logout-small" onclick="logout()">Logout</button>
-        </header>
+    input {
+      width: 100%;
+      padding: 16px;
+      margin-bottom: 14px;
+      border-radius: 14px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      outline: none;
+    }
 
-        <main class="container">
-          <div class="search-box">Search chats, groups, channels...</div>
+    .auth-button {
+      width: 100%;
+      background: #229ed9;
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+    }
 
-          <section class="quick-grid">
-            <div class="quick-box">
-              <span class="quick-icon">💬</span>
-              Chats
-            </div>
+    .switch-button {
+      width: 100%;
+      margin-top: 14px;
+      background: transparent;
+      color: #229ed9;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
 
-            <div class="quick-box">
-              <span class="quick-icon">👥</span>
-              Groups
-            </div>
+    .message {
+      color: red;
+      font-size: 14px;
+      margin-bottom: 14px;
+    }
 
-            <div class="quick-box">
-              <span class="quick-icon">📢</span>
-              Channels
-            </div>
+    .page {
+      min-height: 100vh;
+      padding-bottom: 80px;
+      background: #f4f6fb;
+    }
 
-            <div class="quick-box">
-              <span class="quick-icon">👤</span>
-              Profile
-            </div>
-          </section>
+    .top-bar {
+      background: #229ed9;
+      color: white;
+      padding: 24px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-          <h2 class="section-title">Messages</h2>
+    .logo {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 800;
+    }
 
-          <section class="chat-list">
-            <div class="chat-item">
-              <div class="avatar">R</div>
-              <div class="chat-info">
-                <div class="chat-top">
-                  <h3>Rallygram Updates</h3>
-                  <span>Now</span>
-                </div>
-                <p>Welcome to your new social app!</p>
-              </div>
-            </div>
+    .logged {
+      margin: 6px 0 0;
+      font-size: 15px;
+      opacity: 0.9;
+    }
 
-            <div class="chat-item">
-              <div class="avatar">F</div>
-              <div class="chat-info">
-                <div class="chat-top">
-                  <h3>Friends Group</h3>
-                  <span>10:30</span>
-                </div>
-                <p>Create groups like Telegram.</p>
-              </div>
-            </div>
+    .logout-small {
+      background: white;
+      color: #229ed9;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
 
-            <div class="chat-item">
-              <div class="avatar">C</div>
-              <div class="chat-info">
-                <div class="chat-top">
-                  <h3>My Channel</h3>
-                  <span>09:15</span>
-                </div>
-                <p>Post updates for followers.</p>
-              </div>
-            </div>
-          </section>
-        </main>
+    .container {
+      padding: 18px;
+    }
 
-        <button class="floating-button" onclick="alert('New chat feature coming next')">+</button>
+    .search-box {
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      color: #777;
+      font-size: 16px;
+      margin-bottom: 18px;
+    }
 
-        <nav class="bottom-nav">
-          <div>💬<br />Chats</div>
-          <div>📢<br />Channels</div>
-          <div>👤<br />Profile</div>
-        </nav>
-      </div>
-    `;
-  }
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
 
-  if (getToken()) {
-    renderDashboard();
-  } else {
-    renderAuth();
-  }
-</script>
+    .quick-box {
+      background: white;
+      border-radius: 18px;
+      padding: 14px 8px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .quick-icon {
+      font-size: 24px;
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    .chat-list {
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .chat-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #229ed9;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .chat-info {
+      flex: 1;
+    }
+
+    .chat-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-top h3 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .chat-top span {
+      color: #777;
+      font-size: 13px;
+    }
+
+    .chat-info p {
+      margin: 6px 0 0;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .floating-button {
+      position: fixed;
+      right: 22px;
+      bottom: 88px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      border: none;
+      background: #229ed9;
+      color: white;
+      font-size: 34px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+      cursor: pointer;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      border-top: 1px solid #ddd;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+    }
+  </style>
 </head>
 
 <body>
   <div id="app"></div>
 
   <script>
-    const API_URL = "https://rallygram-backend.onrender.com";
-    const app = document.getElementById("app");
+    var API_URL = "https://rallygram-backend.onrender.com";
+    var app = document.getElementById("app");
+    var isLogin = true;
 
-    let isLogin = true;
+    function renderAuth(message) {
+      if (!message) message = "";
 
-    function getToken() {
-      return localStorage.getItem("token") || "";
-    }
+      if (isLogin) {
+        app.innerHTML =
+          '<div class="auth-page">' +
+            '<div class="auth-card">' +
+              '<h1 class="auth-logo">Rallygram V3</h1>' +
+              '<p class="auth-text">Login with phone number and password</p>' +
 
-    function getUsername() {
-      return localStorage.getItem("username") || "user";
-    }
+              '<form onsubmit="handleAuth(event)">' +
+                '<input id="phone" placeholder="Phone number" />' +
+                '<input id="password" placeholder="Password" type="password" />' +
+                (message ? '<p class="message">' + message + '</p>' : '') +
+                '<button class="auth-button" type="submit">Login</button>' +
+              '</form>' +
 
-    function renderAuth(message = "") {
-      app.innerHTML = `
-        <div class="auth-page">
-          <div class="auth-card">
-            <h1 class="auth-logo">Rallygram V2</h1>
-            <p class="auth-text">Fast, secure and simple social messaging app</p>
+              '<button class="switch-button" onclick="toggleMode()">New user? Create account</button>' +
+            '</div>' +
+          '</div>';
+      } else {
+        app.innerHTML =
+          '<div class="auth-page">' +
+            '<div class="auth-card">' +
+              '<h1 class="auth-logo">Rallygram V3</h1>' +
+              '<p class="auth-text">Create your Rallygram account</p>' +
 
-            <form onsubmit="handleAuth(event)">
-              <input id="username" placeholder="Username" />
-              <input id="password" placeholder="Password" type="password" />
+              '<form onsubmit="handleAuth(event)">' +
+                '<input id="name" placeholder="Full name" />' +
+                '<input id="username" placeholder="Username" />' +
+                '<input id="phone" placeholder="Phone number" />' +
+                '<input id="password" placeholder="Password" type="password" />' +
+                (message ? '<p class="message">' + message + '</p>' : '') +
+                '<button class="auth-button" type="submit">Create Account</button>' +
+              '</form>' +
 
-              ${message ? `<p class="message">${message}</p>` : ""}
-
-              <button class="auth-button" type="submit">
-                ${isLogin ? "Login" : "Create Account"}
-              </button>
-            </form>
-
-            <button class="switch-button" onclick="toggleMode()">
-              ${isLogin ? "New user? Create account" : "Already have account? Login"}
-            </button>
-          </div>
-        </div>
-      `;
+              '<button class="switch-button" onclick="toggleMode()">Already have account? Login</button>' +
+            '</div>' +
+          '</div>';
+      }
     }
 
     async function handleAuth(event) {
       event.preventDefault();
 
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value.trim();
+      var phone = document.getElementById("phone").value.trim();
+      var password = document.getElementById("password").value.trim();
 
-      if (!username || !password) {
-        renderAuth("Username और password दोनों भरो");
-        return;
+      var bodyData = {};
+
+      if (isLogin) {
+        if (!phone || !password) {
+          renderAuth("Phone और password दोनों भरो");
+          return;
+        }
+
+        bodyData = {
+          phone: phone,
+          password: password
+        };
+      } else {
+        var name = document.getElementById("name").value.trim();
+        var username = document.getElementById("username").value.trim();
+
+        if (!name || !username || !phone || !password) {
+          renderAuth("Name, username, phone और password सभी भरो");
+          return;
+        }
+
+        bodyData = {
+          name: name,
+          username: username,
+          phone: phone,
+          password: password
+        };
       }
 
       try {
-        const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
+        var endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
 
-        const res = await fetch(API_URL + endpoint, {
+        var response = await fetch(API_URL + endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify(bodyData)
         });
 
-        const data = await res.json();
+        var data = await response.json();
 
-        if (!res.ok) {
+        if (!response.ok) {
           renderAuth(data.message || data.error || "Something went wrong");
           return;
         }
 
         if (data.token) {
           localStorage.setItem("token", data.token);
-          localStorage.setItem("username", data.username || username);
+
+          if (data.user && data.user.username) {
+            localStorage.setItem("username", data.user.username);
+          } else if (bodyData.username) {
+            localStorage.setItem("username", bodyData.username);
+          } else {
+            localStorage.setItem("username", bodyData.phone);
+          }
+
           renderDashboard();
         } else {
           isLogin = true;
-          renderAuth("Account created. अब login करो.");
+          renderAuth("Account created. अब phone number से login करो.");
         }
       } catch (error) {
         renderAuth("Backend connect नहीं हो रहा. Backend URL check करो.");
@@ -319,107 +380,81 @@
 
     function toggleMode() {
       isLogin = !isLogin;
-      renderAuth();
+      renderAuth("");
     }
 
     function logout() {
       localStorage.removeItem("token");
       localStorage.removeItem("username");
-      renderAuth();
+      renderAuth("");
     }
 
     function renderDashboard() {
-      const username = getUsername();
+      var username = localStorage.getItem("username") || "user";
 
-      app.innerHTML = `
-        <div class="page">
-          <header class="top-bar">
-            <div>
-              <h1 class="logo">Rallygram V2</h1>
-              <p class="logged">@${username}</p>
-            </div>
+      app.innerHTML =
+        '<div class="page">' +
+          '<header class="top-bar">' +
+            '<div>' +
+              '<h1 class="logo">Rallygram V3</h1>' +
+              '<p class="logged">@' + username + '</p>' +
+            '</div>' +
+            '<button class="logout-small" onclick="logout()">Logout</button>' +
+          '</header>' +
 
-            <button class="logout-small" onclick="logout()">Logout</button>
-          </header>
+          '<main class="container">' +
+            '<div class="search-box">Search chats, groups, channels...</div>' +
 
-          <main class="container">
-            <div class="search-box">Search chats, groups, channels...</div>
+            '<section class="quick-grid">' +
+              '<div class="quick-box"><span class="quick-icon">💬</span>Chats</div>' +
+              '<div class="quick-box"><span class="quick-icon">👥</span>Groups</div>' +
+              '<div class="quick-box"><span class="quick-icon">📢</span>Channels</div>' +
+              '<div class="quick-box"><span class="quick-icon">👤</span>Profile</div>' +
+            '</section>' +
 
-            <section class="quick-grid">
-              <div class="quick-box">
-                <span class="quick-icon">💬</span>
-                Chats
-              </div>
+            '<h2 class="section-title">Messages</h2>' +
 
-              <div class="quick-box">
-                <span class="quick-icon">👥</span>
-                Groups
-              </div>
+            '<section class="chat-list">' +
+              '<div class="chat-item">' +
+                '<div class="avatar">R</div>' +
+                '<div class="chat-info">' +
+                  '<div class="chat-top"><h3>Rallygram Updates</h3><span>Now</span></div>' +
+                  '<p>Welcome to your new social app!</p>' +
+                '</div>' +
+              '</div>' +
 
-              <div class="quick-box">
-                <span class="quick-icon">📢</span>
-                Channels
-              </div>
+              '<div class="chat-item">' +
+                '<div class="avatar">F</div>' +
+                '<div class="chat-info">' +
+                  '<div class="chat-top"><h3>Friends Group</h3><span>10:30</span></div>' +
+                  '<p>Create groups like Telegram.</p>' +
+                '</div>' +
+              '</div>' +
 
-              <div class="quick-box">
-                <span class="quick-icon">👤</span>
-                Profile
-              </div>
-            </section>
+              '<div class="chat-item">' +
+                '<div class="avatar">C</div>' +
+                '<div class="chat-info">' +
+                  '<div class="chat-top"><h3>My Channel</h3><span>09:15</span></div>' +
+                  '<p>Post updates for followers.</p>' +
+                '</div>' +
+              '</div>' +
+            '</section>' +
+          '</main>' +
 
-            <h2 class="section-title">Messages</h2>
+          '<button class="floating-button" onclick="alert(\'New chat feature coming next\')">+</button>' +
 
-            <section class="chat-list">
-              <div class="chat-item">
-                <div class="avatar">R</div>
-                <div class="chat-info">
-                  <div class="chat-top">
-                    <h3>Rallygram Updates</h3>
-                    <span>Now</span>
-                  </div>
-                  <p>Welcome to your new social app!</p>
-                </div>
-              </div>
-
-              <div class="chat-item">
-                <div class="avatar">F</div>
-                <div class="chat-info">
-                  <div class="chat-top">
-                    <h3>Friends Group</h3>
-                    <span>10:30</span>
-                  </div>
-                  <p>Create groups like Telegram.</p>
-                </div>
-              </div>
-
-              <div class="chat-item">
-                <div class="avatar">C</div>
-                <div class="chat-info">
-                  <div class="chat-top">
-                    <h3>My Channel</h3>
-                    <span>09:15</span>
-                  </div>
-                  <p>Post updates for followers.</p>
-                </div>
-              </div>
-            </section>
-          </main>
-
-          <button class="floating-button" onclick="alert('New chat feature coming next')">+</button>
-
-          <nav class="bottom-nav">
-            <div>💬<br />Chats</div>
-            <div>📢<br />Channels</div>
-            <div>👤<br />Profile</div>
-          </nav>
-        </div>
-      `;
+          '<nav class="bottom-nav">' +
+            '<div>💬<br />Chats</div>' +
+            '<div>📢<br />Channels</div>' +
+            '<div>👤<br />Profile</div>' +
+          '</nav>' +
+        '</div>';
     }
 
-    if (getToken()) {
+    if (localStorage.getItem("token")) {
       renderDashboard();
     } else {
-      renderAuth();
+      renderAuth("");
     }
   </script>
 </body>
