@@ -644,6 +644,14 @@ socket.on("receive_message", function(data) {
             localStorage.setItem("username", bodyData.phone);
           }
 
+
+          localStorage.setItem("phone", bodyData.phone || "");
+
+if (data.user && data.user.name) {
+  localStorage.setItem("name", data.user.name);
+} else if (bodyData.name) {
+  localStorage.setItem("name", bodyData.name);
+}
           renderDashboard();
         } else {
           isLogin = true;
