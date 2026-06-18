@@ -141,4 +141,47 @@ router.get("/users", async (req, res) => {
   }
 });
 
+// Update Profile
+router.put("/profile/:username", async (req, res) => {
+  try {
+    const username = req.params.username;
+    const { name, phone, bio } = req.body;
+
+    if (!name || !phone) {
+      return res.status(400).json({
+        success: false,
+        message: "Name and phone are required"
+      });
+    }
+
+    const updatedUser = await User.findOneAndUpdate(
+      { username: username },
+      {
+        name: name,
+        phone: phone,
+        bio: bio || ""
+      },
+      { new: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: updatedUser
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Profile update failed"
+    });
+  }
+});
+
 module.exports = router;
