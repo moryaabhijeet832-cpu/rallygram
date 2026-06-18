@@ -362,6 +362,7 @@ var socket = io(API_URL, {
 });
 
 var currentChatName = "";
+    var currentChatTitle = "";
 
 function safeText(text) {
   return String(text)
@@ -396,9 +397,11 @@ socket.on("receive_message", function(data) {
     return;
   }
 
-  messagesBox.innerHTML =
-    '<div class="other-message">Welcome to ' + currentChatName + '</div>';
+  var titleEl = document.querySelector(".chat-title");
+var welcomeName = titleEl ? titleEl.innerText : currentChatName;
 
+messagesBox.innerHTML =
+  '<div class="other-message">Welcome to ' + safeText(welcomeName) + '</div>';
   var myUsername = localStorage.getItem("username") || "user";
 
   messages.forEach(function(msg) {
@@ -540,6 +543,7 @@ socket.on("receive_message", function(data) {
    function openChat(chatName, avatar, titleText) {
   window.scrollTo(0, 0);
   currentChatName = chatName;
+     currentChatTitle = displayTitle;
 
   var displayTitle = titleText || chatName;
 
