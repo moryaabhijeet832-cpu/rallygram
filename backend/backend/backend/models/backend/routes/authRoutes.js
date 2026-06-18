@@ -1,10 +1,41 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../User");
+const mongoose = require("mongoose");
 
 const router = express.Router();
 
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true
+    },
+    username: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    phone: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    password: {
+      type: String,
+      required: true
+    },
+    bio: {
+      type: String,
+      default: ""
+    }
+  },
+  {
+    timestamps: true
+  }
+);
+
+const User = mongoose.models.User || mongoose.model("User", userSchema);
 // Register User
 router.post("/register", async (req, res) => {
   try {
