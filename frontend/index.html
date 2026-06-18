@@ -748,11 +748,18 @@ if (typeof loadUsers === "function") {
   }
 }
     
-    if (localStorage.getItem("token")) {
-      renderDashboard();
-    } else {
-      renderAuth("");
-    }
+    try {
+  if (localStorage.getItem("token")) {
+    renderDashboard();
+  } else {
+    renderAuth("");
+  }
+} catch (error) {
+  document.getElementById("app").innerHTML =
+    '<div style="padding:20px;font-family:Arial;color:red;">Frontend Error: ' +
+    error.message +
+    '</div>';
+}
   </script>
 </body>
 </html>
