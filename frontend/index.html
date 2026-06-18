@@ -7,6 +7,12 @@
   
   <style>
 
+    .search-box {
+  width: 100%;
+  border: none;
+  outline: none;
+    }
+
 .chat-page {
   min-height: 100vh;
   background: #f4f6fb;
@@ -591,6 +597,69 @@ function makePrivateRoom(myUsername, otherUsername) {
   return "private:" + users[0] + ":" + users[1];
 }
 
+var allUsersData = [];
+
+function renderUsersList(searchText) {
+  var usersList = document.getElementById("usersList");
+
+  if (!usersList) {
+    return;
+  }
+
+  var myUsername = localStorage.getItem("username") || "user";
+  var keyword = String(searchText || "").toLowerCase();
+
+  var users = allUsersData.filter(function(user) {
+    if (user.username === myUsername) {
+      return false;
+    }
+
+    var username = String(user.username || "").toLowerCase();
+    var name = String(user.name || "").toLowerCase();
+    var phone = String(user.phone || "").toLowerCase();
+
+    return (
+      username.includes(keyword) ||
+      name.includes(keyword) ||
+      phone.includes(keyword)
+    );
+  });
+
+  if (users.length === 0) {
+    usersList.innerHTML = '<div class="chat-item">No users found</div>';
+    return;
+  }
+
+  usersList.innerHTML = "";
+
+  users.forEach(function(user) {
+    var firstLetter = user.username ? user.username.charAt(0).toUpperCase() : "U";
+    var roomName = makePrivateRoom(myUsername, user.username);
+
+    usersList.innerHTML +=
+      '<div class="chat-item" onclick="openChat(\'' + roomName + '\', \'' + firstLetter + '\', \'@' + user.username + '\')">' +
+        '<div class="avatar">' + firstLetter + '</div>' +
+        '<div class="chat-info">' +
+          '<div class="chat-top">' +
+            '<h3>@' + safeText(user.username) + '</h3>' +
+            '<span>Online</span>' +
+          '</div>' +
+          '<p>' + safeText(user.name || "Rallygram user") + '</p>' +
+        '</div>' +
+      '</div>';
+  });
+}
+
+function filterUsers() {
+  var input = document.getElementById("userSearchInput");
+
+  if (!input) {
+    return;
+  }
+
+  renderUsersList(input.value);
+}
+
 async function loadUsers() {
   var usersList = document.getElementById("usersList");
 
@@ -609,90 +678,12 @@ async function loadUsers() {
       return;
     }
 
-    var myUsername = localStorage.getItem("username") || "user";
-
-    var users = data.users.filter(function(user) {
-      return user.username !== myUsername;
-    });
-
-    if (users.length === 0) {
-      usersList.innerHTML = '<div class="chat-item">No other users found</div>';
-      return;
-    }
-
-    usersList.innerHTML = "";
-
-    users.forEach(function(user) {
-      var firstLetter = user.username ? user.username.charAt(0).toUpperCase() : "U";
-      var roomName = makePrivateRoom(myUsername, user.username);
-
-      usersList.innerHTML +=
-        '<div class="chat-item" onclick="openChat(\'' + roomName + '\', \'' + firstLetter + '\', \'@' + user.username + '\')">' +
-          '<div class="avatar">' + firstLetter + '</div>' +
-          '<div class="chat-info">' +
-            '<div class="chat-top">' +
-              '<h3>@' + safeText(user.username) + '</h3>' +
-              '<span>Online</span>' +
-            '</div>' +
-            '<p>' + safeText(user.name || "Rallygram user") + '</p>' +
-          '</div>' +
-        '</div>';
-    });
+    allUsersData = data.users || [];
+    renderUsersList("");
   } catch (error) {
     usersList.innerHTML = '<div class="chat-item">Backend connect failed</div>';
   }
-                                  }
-    async function loadRecentChats() {
-  var recentList = document.getElementById("recentChatsList");
-
-  if (!recentList) {
-    return;
-  }
-
-  var myUsername = localStorage.getItem("username") || "user";
-
-  recentList.innerHTML = '<div class="chat-item">Loading recent chats...</div>';
-
-  try {
-    var response = await fetch(API_URL + "/api/messages/recent/" + myUsername);
-    var data = await response.json();
-
-    if (!data.success || !data.chats || data.chats.length === 0) {
-      recentList.innerHTML = '<div class="chat-item">No recent chats yet</div>';
-      return;
-    }
-
-    recentList.innerHTML = "";
-
-    data.chats.forEach(function(chat) {
-      var roomName = chat._id;
-      var parts = roomName.split(":");
-
-      var otherUsername = "user";
-
-      if (parts.length === 3) {
-        otherUsername = parts[1] === myUsername ? parts[2] : parts[1];
-      }
-
-      var firstLetter = otherUsername.charAt(0).toUpperCase();
-      var lastMessage = chat.lastMessage || "No message";
-
-      recentList.innerHTML +=
-        '<div class="chat-item" onclick="openChat(\'' + roomName + '\', \'' + firstLetter + '\', \'@' + otherUsername + '\')">' +
-          '<div class="avatar">' + firstLetter + '</div>' +
-          '<div class="chat-info">' +
-            '<div class="chat-top">' +
-              '<h3>@' + safeText(otherUsername) + '</h3>' +
-              '<span>Recent</span>' +
-            '</div>' +
-            '<p>' + safeText(lastMessage) + '</p>' +
-          '</div>' +
-        '</div>';
-    });
-  } catch (error) {
-    recentList.innerHTML = '<div class="chat-item">Recent chats load failed</div>';
-  }
-        }
+}
 function renderDashboard() {
   window.scrollTo(0, 0);
 
@@ -709,8 +700,7 @@ function renderDashboard() {
       '</header>' +
 
       '<main class="container">' +
-        '<div class="search-box">Search users, chats, groups...</div>' +
-
+        '<input id="userSearchInput" class="search-box" placeholder="Search users by name, username, phone..." oninput="filterUsers()" />' +
         '<section class="quick-grid">' +
           '<div class="quick-box"><span class="quick-icon">💬</span>Chats</div>' +
           '<div class="quick-box"><span class="quick-icon">👥</span>Users</div>' +
