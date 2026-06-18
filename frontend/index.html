@@ -389,6 +389,27 @@ socket.on("receive_message", function(data) {
 
   messages.scrollTop = messages.scrollHeight;
 });
+    socket.on("old_messages", function(messages) {
+  var messagesBox = document.getElementById("chatMessages");
+
+  if (!messagesBox) {
+    return;
+  }
+
+  messagesBox.innerHTML =
+    '<div class="other-message">Welcome to ' + currentChatName + '</div>';
+
+  var myUsername = localStorage.getItem("username") || "user";
+
+  messages.forEach(function(msg) {
+    var messageClass = msg.sender === myUsername ? "my-message" : "other-message";
+
+    messagesBox.innerHTML +=
+      '<div class="' + messageClass + '">' + safeText(msg.text) + '</div>';
+  });
+
+  messagesBox.scrollTop = messagesBox.scrollHeight;
+});
     function renderAuth(message) {
       if (!message) message = "";
 
