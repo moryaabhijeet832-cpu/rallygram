@@ -730,8 +730,22 @@ function renderDashboard() {
       '</nav>' +
     '</div>';
 
+  if (typeof loadRecentChats === "function") {
   loadRecentChats();
+} else {
+  var recentBox = document.getElementById("recentChatsList");
+  if (recentBox) {
+    recentBox.innerHTML = '<div class="chat-item">Recent chats function missing</div>';
+  }
+}
+
+if (typeof loadUsers === "function") {
   loadUsers();
+} else {
+  var usersBox = document.getElementById("usersList");
+  if (usersBox) {
+    usersBox.innerHTML = '<div class="chat-item">Users function missing</div>';
+  }
 }
     
     if (localStorage.getItem("token")) {
