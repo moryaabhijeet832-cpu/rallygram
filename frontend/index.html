@@ -389,68 +389,102 @@
       renderAuth("");
     }
 
-    function renderDashboard() {
-      var username = localStorage.getItem("username") || "user";
+   function openChat(chatName, avatar) {
+  app.innerHTML =
+    '<div class="chat-page">' +
+      '<header class="chat-header">' +
+        '<button class="back-btn" onclick="renderDashboard()">←</button>' +
+        '<div class="avatar">' + avatar + '</div>' +
+        '<h1 class="chat-title">' + chatName + '</h1>' +
+      '</header>' +
 
-      app.innerHTML =
-        '<div class="page">' +
-          '<header class="top-bar">' +
-            '<div>' +
-              '<h1 class="logo">Rallygram V3</h1>' +
-              '<p class="logged">@' + username + '</p>' +
+      '<div id="chatMessages" class="messages-area">' +
+        '<div class="other-message">Welcome to ' + chatName + '</div>' +
+        '<div class="my-message">Hello 👋</div>' +
+      '</div>' +
+
+      '<div class="message-box">' +
+        '<input id="messageInput" class="message-input" placeholder="Type a message..." />' +
+        '<button class="send-btn" onclick="sendDemoMessage()">Send</button>' +
+      '</div>' +
+    '</div>';
+}
+
+function sendDemoMessage() {
+  var input = document.getElementById("messageInput");
+  var messages = document.getElementById("chatMessages");
+
+  if (!input.value.trim()) {
+    return;
+  }
+
+  messages.innerHTML += '<div class="my-message">' + input.value + '</div>';
+  input.value = "";
+}
+function renderDashboard() {
+  var username = localStorage.getItem("username") || "user";
+
+  app.innerHTML =
+    '<div class="page">' +
+      '<header class="top-bar">' +
+        '<div>' +
+          '<h1 class="logo">Rallygram V3</h1>' +
+          '<p class="logged">@' + username + '</p>' +
+        '</div>' +
+        '<button class="logout-small" onclick="logout()">Logout</button>' +
+      '</header>' +
+
+      '<main class="container">' +
+        '<div class="search-box">Search chats, groups, channels...</div>' +
+
+        '<section class="quick-grid">' +
+          '<div class="quick-box"><span class="quick-icon">💬</span>Chats</div>' +
+          '<div class="quick-box"><span class="quick-icon">👥</span>Groups</div>' +
+          '<div class="quick-box"><span class="quick-icon">📢</span>Channels</div>' +
+          '<div class="quick-box"><span class="quick-icon">👤</span>Profile</div>' +
+        '</section>' +
+
+        '<h2 class="section-title">Messages</h2>' +
+
+        '<section class="chat-list">' +
+
+          '<div class="chat-item" onclick="openChat(\'Rallygram Updates\', \'R\')">' +
+            '<div class="avatar">R</div>' +
+            '<div class="chat-info">' +
+              '<div class="chat-top"><h3>Rallygram Updates</h3><span>Now</span></div>' +
+              '<p>Welcome to your new social app!</p>' +
             '</div>' +
-            '<button class="logout-small" onclick="logout()">Logout</button>' +
-          '</header>' +
+          '</div>' +
 
-          '<main class="container">' +
-            '<div class="search-box">Search chats, groups, channels...</div>' +
+          '<div class="chat-item" onclick="openChat(\'Friends Group\', \'F\')">' +
+            '<div class="avatar">F</div>' +
+            '<div class="chat-info">' +
+              '<div class="chat-top"><h3>Friends Group</h3><span>10:30</span></div>' +
+              '<p>Create groups like Telegram.</p>' +
+            '</div>' +
+          '</div>' +
 
-            '<section class="quick-grid">' +
-              '<div class="quick-box"><span class="quick-icon">💬</span>Chats</div>' +
-              '<div class="quick-box"><span class="quick-icon">👥</span>Groups</div>' +
-              '<div class="quick-box"><span class="quick-icon">📢</span>Channels</div>' +
-              '<div class="quick-box"><span class="quick-icon">👤</span>Profile</div>' +
-            '</section>' +
+          '<div class="chat-item" onclick="openChat(\'My Channel\', \'C\')">' +
+            '<div class="avatar">C</div>' +
+            '<div class="chat-info">' +
+              '<div class="chat-top"><h3>My Channel</h3><span>09:15</span></div>' +
+              '<p>Post updates for followers.</p>' +
+            '</div>' +
+          '</div>' +
 
-            '<h2 class="section-title">Messages</h2>' +
+        '</section>' +
+      '</main>' +
 
-            '<section class="chat-list">' +
-              '<div class="chat-item">' +
-                '<div class="avatar">R</div>' +
-                '<div class="chat-info">' +
-                  '<div class="chat-top"><h3>Rallygram Updates</h3><span>Now</span></div>' +
-                  '<p>Welcome to your new social app!</p>' +
-                '</div>' +
-              '</div>' +
+      '<button class="floating-button" onclick="alert(\'New chat feature coming next\')">+</button>' +
 
-              '<div class="chat-item">' +
-                '<div class="avatar">F</div>' +
-                '<div class="chat-info">' +
-                  '<div class="chat-top"><h3>Friends Group</h3><span>10:30</span></div>' +
-                  '<p>Create groups like Telegram.</p>' +
-                '</div>' +
-              '</div>' +
-
-              '<div class="chat-item">' +
-                '<div class="avatar">C</div>' +
-                '<div class="chat-info">' +
-                  '<div class="chat-top"><h3>My Channel</h3><span>09:15</span></div>' +
-                  '<p>Post updates for followers.</p>' +
-                '</div>' +
-              '</div>' +
-            '</section>' +
-          '</main>' +
-
-          '<button class="floating-button" onclick="alert(\'New chat feature coming next\')">+</button>' +
-
-          '<nav class="bottom-nav">' +
-            '<div>💬<br />Chats</div>' +
-            '<div>📢<br />Channels</div>' +
-            '<div>👤<br />Profile</div>' +
-          '</nav>' +
-        '</div>';
-    }
-
+      '<nav class="bottom-nav">' +
+        '<div>💬<br />Chats</div>' +
+        '<div>📢<br />Channels</div>' +
+        '<div>👤<br />Profile</div>' +
+      '</nav>' +
+    '</div>';
+}
+    
     if (localStorage.getItem("token")) {
       renderDashboard();
     } else {
