@@ -815,7 +815,7 @@ async function loadUsers() {
   } catch (error) {
     usersList.innerHTML = '<div class="chat-item">Backend connect failed</div>';
   }
-
+}
 async function loadRecentChats() {
   var recentList = document.getElementById("recentChatsList");
 
@@ -866,7 +866,7 @@ async function loadRecentChats() {
   } catch (error) {
     recentList.innerHTML = '<div class="chat-item">Recent chats load failed</div>';
   }
-
+}
 async function renderProfile() {
   window.scrollTo(0, 0);
 
