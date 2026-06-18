@@ -441,7 +441,7 @@ socket.on("receive_message", function(data) {
   '</div>';
   messages.scrollTop = messages.scrollHeight;
 });
-    socket.on("old_messages", function(messages) {
+ socket.on("old_messages", function(messages) {
   var messagesBox = document.getElementById("chatMessages");
 
   if (!messagesBox) {
@@ -449,23 +449,25 @@ socket.on("receive_message", function(data) {
   }
 
   var titleEl = document.querySelector(".chat-title");
-var welcomeName = titleEl ? titleEl.innerText : currentChatName;
+  var welcomeName = titleEl ? titleEl.innerText : currentChatName;
 
-messagesBox.innerHTML =
-  '<div class="other-message">Welcome to ' + safeText(welcomeName) + '</div>';
+  messagesBox.innerHTML =
+    '<div class="other-message">Welcome to ' + safeText(welcomeName) + '</div>';
+
   var myUsername = localStorage.getItem("username") || "user";
 
   messages.forEach(function(msg) {
     var messageClass = msg.sender === myUsername ? "my-message" : "other-message";
 
     messagesBox.innerHTML +=
-  '<div class="' + messageClass + '">' +
-    safeText(msg.text) +
-    '<div class="message-time">' + safeText(formatMessageTime(msg.time || msg.createdAt)) + '</div>' +
-  '</div>';
+      '<div class="' + messageClass + '">' +
+        safeText(msg.text) +
+        '<div class="message-time">' + safeText(formatMessageTime(msg.time || msg.createdAt)) + '</div>' +
+      '</div>';
+  });
+
   messagesBox.scrollTop = messagesBox.scrollHeight;
 });
-    function renderAuth(message) {
       if (!message) message = "";
 
       if (isLogin) {
