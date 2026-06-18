@@ -873,7 +873,8 @@ async function renderProfile() {
   var username = localStorage.getItem("username") || "user";
   var name = localStorage.getItem("name") || "Rallygram User";
   var phone = localStorage.getItem("phone") || "Not available";
-
+var bio = localStorage.getItem("bio") || "";
+  
   try {
     var response = await fetch(API_URL + "/api/auth/users");
     var data = await response.json();
