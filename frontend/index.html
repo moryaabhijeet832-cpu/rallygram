@@ -886,10 +886,12 @@ var bio = localStorage.getItem("bio") || "";
 
       if (currentUser) {
         name = currentUser.name || name;
-        phone = currentUser.phone || phone;
+phone = currentUser.phone || phone;
+bio = currentUser.bio || bio;
 
-        localStorage.setItem("name", name);
-        localStorage.setItem("phone", phone);
+localStorage.setItem("name", name);
+localStorage.setItem("phone", phone);
+localStorage.setItem("bio", bio);
       }
     }
   } catch (error) {}
