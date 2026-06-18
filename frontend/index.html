@@ -809,16 +809,7 @@ async function loadUsers() {
 
     allUsersData = data.users || [];
 
-    var mySavedUsername = localStorage.getItem("username") || "user";
-
-    var myUserData = allUsersData.find(function(user) {
-      return user.username === mySavedUsername;
-    });
-
-    if (myUserData) {
-      localStorage.setItem("name", myUserData.name || "");
-      localStorage.setItem("phone", myUserData.phone || "");
-    }
+    
 
     renderUsersList("");
   } catch (error) {
